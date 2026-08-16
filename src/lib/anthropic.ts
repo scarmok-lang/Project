@@ -16,12 +16,11 @@ function getClient(): Anthropic {
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
 
-export type Section = "LOGICAL_REASONING" | "READING_COMPREHENSION" | "LOGIC_GAMES";
+export type Section = "LOGICAL_REASONING" | "READING_COMPREHENSION";
 
 const SECTION_LABEL: Record<Section, string> = {
   LOGICAL_REASONING: "Logical Reasoning",
   READING_COMPREHENSION: "Reading Comprehension",
-  LOGIC_GAMES: "Logic Games (Analytical Reasoning)",
 };
 
 export interface ChoiceMap {
@@ -81,7 +80,7 @@ Diagnose this missed question.`;
         questionType: {
           type: "string",
           description:
-            "The canonical LSAT question type, e.g. 'Necessary Assumption', 'Strengthen', 'Flaw in the Reasoning', 'Must Be True', 'Parallel Reasoning', 'Main Point', 'Method of Reasoning', 'Resolve the Paradox', 'Point at Issue', 'Sufficient Assumption', or the equivalent RC/Logic Games category.",
+            "The canonical LSAT question type, e.g. 'Necessary Assumption', 'Strengthen', 'Flaw in the Reasoning', 'Must Be True', 'Parallel Reasoning', 'Main Point', 'Method of Reasoning', 'Resolve the Paradox', 'Point at Issue', 'Sufficient Assumption', or the equivalent Reading Comprehension category.",
         },
         coreSkill: {
           type: "string",
@@ -91,7 +90,7 @@ Diagnose this missed question.`;
         skillCategory: {
           type: "string",
           description:
-            "Broad category the core skill belongs to, e.g. 'Logical Reasoning', 'Reading Comprehension', or 'Logic Games'.",
+            "Broad category the core skill belongs to, e.g. 'Logical Reasoning' or 'Reading Comprehension'.",
         },
         errorPattern: {
           type: "string",

@@ -13,7 +13,6 @@ datasource db {
 enum Section {
   LOGICAL_REASONING
   READING_COMPREHENSION
-  LOGIC_GAMES
 }
 
 // A question the user got wrong on an official LSAT question bank.

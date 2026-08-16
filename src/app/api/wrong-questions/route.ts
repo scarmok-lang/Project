@@ -5,7 +5,7 @@ import { analyzeWrongQuestion } from "@/lib/anthropic";
 import { recordSkillMiss } from "@/lib/skills";
 
 const createSchema = z.object({
-  section: z.enum(["LOGICAL_REASONING", "READING_COMPREHENSION", "LOGIC_GAMES"]),
+  section: z.enum(["LOGICAL_REASONING", "READING_COMPREHENSION"]),
   passage: z.string().trim().optional(),
   stem: z.string().trim().min(1, "Question stem is required"),
   choices: z.record(z.string(), z.string().trim().min(1)).refine(
