@@ -1,0 +1,95 @@
+// Prisma schema for the LSAT Prep Assistant
+// docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Section {
+  LOGICAL_REASONING
+  READING_COMPREHENSION
+  LOGIC_GAMES
+}
+
+// A question the user got wrong on an official LSAT question bank.
+model WrongQuestion {
+  id             String   @id @default(cuid())
+  section        Section
+  passage        String? // for Reading Comprehension, the shared passage text
+  stem           String // the question prompt itself
+  choices        Json // { "A": "...", "B": "...", "C": "...", "D": "...", "E": "..." }
+  correctAnswer  String // e.g. "C"
+  userAnswer     String // e.g. "A"
+  source         String? // e.g. "PrepTest 90, Section 2, Q14"
+  notes          String? // free-form notes from the user
+
+  // Filled in by AI analysis
+  questionType   String? // e.g. "Necessary Assumption", "Flaw in the Reasoning"
+  coreSkill      String? // the specific reasoning skill this question hinges on
+  errorPattern   String? // the likely reason the user picked the wrong answer
+  explanation    String? // full explanation of why the correct answer is correct
+
+  analyzedAt     DateTime?
+  createdAt      DateTime @default(now())
+
+  skillTagId     String?
+  skillTag       SkillTag? @relation(fields: [skillTagId], references: [id])
+
+  practiceQuestions PracticeQuestion[]
+
+  @@index([skillTagId])
+}
+
+// A normalized reasoning skill, aggregated across many wrong questions.
+model SkillTag {
+  id            String   @id @default(cuid())
+  name          String   @unique // e.g. "Necessary vs. Sufficient Conditions"
+  category      String // e.g. "Logical Reasoning"
+  description   String?
+  missCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  wrongQuestions WrongQuestion[]
+  practiceSets   PracticeSet[]
+}
+
+// A generated batch of practice questions targeting one skill gap.
+model PracticeSet {
+  id         String   @id @default(cuid())
+  skillTagId String
+  skillTag   SkillTag @relation(fields: [skillTagId], references: [id])
+  createdAt  DateTime @default(now())
+  completedAt DateTime?
+
+  questions  PracticeQuestion[]
+
+  @@index([skillTagId])
+}
+
+// A single AI-generated practice question within a practice set.
+model PracticeQuestion {
+  id                    String   @id @default(cuid())
+  practiceSetId         String
+  practiceSet           PracticeSet @relation(fields: [practiceSetId], references: [id])
+
+  sourceWrongQuestionId String?
+  sourceWrongQuestion   WrongQuestion? @relation(fields: [sourceWrongQuestionId], references: [id], onDelete: SetNull)
+
+  stem          String
+  choices       Json // { "A": "...", ... }
+  correctAnswer String
+  explanation   String
+
+  userAnswer    String?
+  isCorrect     Boolean?
+  answeredAt    DateTime?
+
+  createdAt     DateTime @default(now())
+
+  @@index([practiceSetId])
+}
